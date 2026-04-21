@@ -1,0 +1,1 @@
+After joining accounts and transactions, classify each transaction as 'active-high-risk', 'active-normal', or 'inactive' using CASE.

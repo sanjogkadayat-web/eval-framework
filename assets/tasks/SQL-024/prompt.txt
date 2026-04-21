@@ -1,0 +1,1 @@
+Deduplicate accounts by precedence rule: ACTIVE outranks SUSPENDED, which outranks CLOSED, regardless of open date.

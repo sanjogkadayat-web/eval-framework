@@ -1,0 +1,1 @@
+Build a simple funnel from account_opened → first_transaction → first_flagged_transaction and measure drop-off.

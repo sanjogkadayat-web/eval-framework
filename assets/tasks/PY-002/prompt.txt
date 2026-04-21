@@ -1,0 +1,1 @@
+Validate that account_open_date, txn_date, and balance_date can be parsed as dates and that numeric columns have numeric dtype.

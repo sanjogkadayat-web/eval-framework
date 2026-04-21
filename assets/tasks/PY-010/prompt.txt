@@ -1,0 +1,1 @@
+Flag transactions whose channel is not in the allowed set {ATM, BRANCH, MOBILE, ONLINE}.

@@ -1,0 +1,1 @@
+Use a CTE with ROW_NUMBER to keep the latest duplicate transaction per txn_id in the duplicate-heavy variant.

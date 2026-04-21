@@ -1,0 +1,1 @@
+Write a multi-step SQL ETL pipeline that ingests raw accounts, validates required fields, deduplicates, and outputs a conformed table.

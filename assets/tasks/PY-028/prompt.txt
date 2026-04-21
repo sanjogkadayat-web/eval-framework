@@ -1,0 +1,1 @@
+Flag likely churned accounts with no transactions in the last N days relative to the dataset max date.

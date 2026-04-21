@@ -1,0 +1,1 @@
+Assign each account to a cohort based on account_open_date month.

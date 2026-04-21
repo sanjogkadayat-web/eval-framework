@@ -1,0 +1,1 @@
+Build a three-DataFrame merge pipeline across accounts, transactions, and daily_balances and assert row counts at each step.
