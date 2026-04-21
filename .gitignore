@@ -1,1 +1,8 @@
 .DS_Store
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+
+# Local outputs
+processed_data/

@@ -1,0 +1,1 @@
+Two chained CTEs: first total txn_amount per account, second rank within region.

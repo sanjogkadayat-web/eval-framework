@@ -1,0 +1,1 @@
+Multi-CTE ETL: validate nulls, deduplicate accounts, deduplicate transactions, output conformed table.

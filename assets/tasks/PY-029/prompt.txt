@@ -1,0 +1,1 @@
+Config-driven pipeline reading input_paths, output_path, thresholds from YAML.

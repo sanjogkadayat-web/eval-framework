@@ -1,0 +1,1 @@
+Group by txn_type, return total txn_amount and row_count.

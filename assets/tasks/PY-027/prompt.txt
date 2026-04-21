@@ -1,0 +1,1 @@
+RFM scores per account: recency_days, frequency, monetary.

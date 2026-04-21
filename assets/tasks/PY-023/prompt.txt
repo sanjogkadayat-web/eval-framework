@@ -1,0 +1,1 @@
+End-to-end pipeline: ingest, validate, deduplicate, engineer 3 features, write outputs with logging.

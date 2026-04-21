@@ -1,0 +1,1 @@
+Filter transactions by is_flagged and txn_amount threshold, log rows dropped.

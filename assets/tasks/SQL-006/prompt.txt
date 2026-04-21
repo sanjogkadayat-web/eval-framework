@@ -1,0 +1,1 @@
+Left join accounts to transactions, return accounts with no transactions.

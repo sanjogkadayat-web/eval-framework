@@ -1,0 +1,1 @@
+Find transactions whose account_id does not exist in accounts.

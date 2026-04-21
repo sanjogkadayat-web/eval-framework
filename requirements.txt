@@ -1,0 +1,7 @@
+tiktoken
+sqlfluff
+flake8
+pytest
+pandas
+pyyaml
+duckdb

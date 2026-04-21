@@ -1,0 +1,1 @@
+LAG to compute day-over-day change in closing_balance per account.

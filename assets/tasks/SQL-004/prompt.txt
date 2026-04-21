@@ -1,0 +1,1 @@
+Find min and max closing_balance per account_id.

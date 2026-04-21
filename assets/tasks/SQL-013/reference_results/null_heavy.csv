@@ -1,0 +1,5 @@
+region,flagged_transaction_count,unflagged_transaction_count
+EAST,4.0,73.0
+NORTH,6.0,78.0
+SOUTH,6.0,101.0
+WEST,6.0,95.0

@@ -1,0 +1,1 @@
+Assign cohort column based on year-month of account_open_date.

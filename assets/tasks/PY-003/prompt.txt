@@ -1,0 +1,1 @@
+Count nulls per column, raise ValueError if any column exceeds a threshold (default 0.3).

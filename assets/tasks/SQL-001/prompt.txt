@@ -1,0 +1,1 @@
+Return all ACTIVE accounts showing account_id, customer_segment, region.
