@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Compute a rolling average of closing_balance over the last 7 observations per account."""
-    df = pd.read_csv(balances_path)
+    df = pd.read_csv(balances_path, comment='#')
     
     # Convert balance_date to datetime
     df['balance_date'] = pd.to_datetime(df['balance_date'])

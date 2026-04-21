@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Drop exact duplicate rows from duplicate-heavy transactions and print how many were removed."""
-    df = pd.read_csv(transactions_path)
+    df = pd.read_csv(transactions_path, comment='#')
     
     initial_count = len(df)
     df_deduplicated = df.drop_duplicates()

@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Load accounts CSV, skip synthetic header, assert expected column names."""
-    df = pd.read_csv(accounts_path)
+    df = pd.read_csv(accounts_path, comment='#')
     
     expected_columns = ['account_id', 'customer_segment', 'account_open_date', 'account_status', 'region']
     actual_columns = df.columns.tolist()

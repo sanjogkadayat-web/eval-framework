@@ -9,9 +9,9 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Build a three-DataFrame merge pipeline across accounts, transactions, and daily_balances and assert row counts at each step."""
-    accounts = pd.read_csv(accounts_path)
-    transactions = pd.read_csv(transactions_path)
-    balances = pd.read_csv(balances_path)
+    accounts = pd.read_csv(accounts_path, comment='#')
+    transactions = pd.read_csv(transactions_path, comment='#')
+    balances = pd.read_csv(balances_path, comment='#')
     
     initial_txn_count = len(transactions)
     

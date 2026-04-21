@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Group transactions by txn_type and compute total txn_amount and row count."""
-    df = pd.read_csv(transactions_path)
+    df = pd.read_csv(transactions_path, comment='#')
     
     grouped = df.groupby('txn_type').agg(
         total_txn_amount=('txn_amount', 'sum'),

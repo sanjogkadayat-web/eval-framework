@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path, threshold=0.30):
     """Count nulls per column and raise error if any column exceeds threshold."""
-    df = pd.read_csv(transactions_path)
+    df = pd.read_csv(transactions_path, comment='#')
     
     null_counts = df.isnull().sum()
     null_percentages = (null_counts / len(df)) * 100

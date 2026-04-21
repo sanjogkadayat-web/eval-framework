@@ -9,8 +9,8 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Build a pivot table of total txn_amount by region and channel."""
-    transactions = pd.read_csv(transactions_path)
-    accounts = pd.read_csv(accounts_path)
+    transactions = pd.read_csv(transactions_path, comment='#')
+    accounts = pd.read_csv(accounts_path, comment='#')
     
     # Merge to get region information
     merged = transactions.merge(accounts[['account_id', 'region']], on='account_id', how='left')

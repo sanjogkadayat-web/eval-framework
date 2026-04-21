@@ -8,10 +8,10 @@ import sys
 import pytest
 import pandas as pd
 
-sys.path.insert(0, str(pathlib.Path(__file__).parent))
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "answers_python"))
 task = importlib.import_module("task27a")
 
-DATASET_DIR = pathlib.Path(__file__).parent.parent / "assets" / "datasets"
+DATASET_DIR = pathlib.Path(__file__).parent.parent.parent / "datasets"
 
 @pytest.mark.parametrize("variant", ["clean", "null_heavy", "duplicate_heavy", "medium", "large"])
 def test_task27a(variant):

@@ -9,8 +9,8 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Compute funnel drop-off from account creation to first transaction to first flagged transaction."""
-    accounts = pd.read_csv(accounts_path)
-    transactions = pd.read_csv(transactions_path)
+    accounts = pd.read_csv(accounts_path, comment='#')
+    transactions = pd.read_csv(transactions_path, comment='#')
     
     # Convert dates
     transactions['txn_date'] = pd.to_datetime(transactions['txn_date'])

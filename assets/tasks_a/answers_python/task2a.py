@@ -9,9 +9,9 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Validate date columns can be parsed as dates and numeric columns have numeric dtype."""
-    accounts = pd.read_csv(accounts_path)
-    transactions = pd.read_csv(transactions_path)
-    balances = pd.read_csv(balances_path)
+    accounts = pd.read_csv(accounts_path, comment='#')
+    transactions = pd.read_csv(transactions_path, comment='#')
+    balances = pd.read_csv(balances_path, comment='#')
     
     # Parse and validate date columns
     accounts['account_open_date'] = pd.to_datetime(accounts['account_open_date'], errors='raise')

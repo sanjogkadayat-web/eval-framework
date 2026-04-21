@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Flag transactions whose channel is not in the allowed set."""
-    df = pd.read_csv(transactions_path)
+    df = pd.read_csv(transactions_path, comment='#')
     
     allowed_channels = {'ATM', 'BRANCH', 'MOBILE', 'ONLINE'}
     

@@ -16,7 +16,7 @@ def deduplicate_transactions(transactions_df):
 def run(accounts_path, transactions_path, balances_path):
     """Write parameterized pytest cases covering null-heavy, duplicate-heavy, and clean variants for one transformation function."""
     # This is a demonstration of the transformation function
-    transactions = pd.read_csv(transactions_path)
+    transactions = pd.read_csv(transactions_path, comment='#')
     
     initial_count = len(transactions)
     deduplicated = deduplicate_transactions(transactions)

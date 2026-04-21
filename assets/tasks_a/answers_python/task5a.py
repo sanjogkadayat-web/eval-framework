@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path, min_amount=100.0):
     """Filter transactions to keep only flagged transactions above a chosen amount."""
-    df = pd.read_csv(transactions_path)
+    df = pd.read_csv(transactions_path, comment='#')
     
     initial_count = len(df)
     

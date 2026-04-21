@@ -9,8 +9,8 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path, days_threshold=90):
     """Flag likely churned accounts with no transactions in the last N days relative to the dataset max date."""
-    accounts = pd.read_csv(accounts_path)
-    transactions = pd.read_csv(transactions_path)
+    accounts = pd.read_csv(accounts_path, comment='#')
+    transactions = pd.read_csv(transactions_path, comment='#')
     
     # Convert dates
     transactions['txn_date'] = pd.to_datetime(transactions['txn_date'])

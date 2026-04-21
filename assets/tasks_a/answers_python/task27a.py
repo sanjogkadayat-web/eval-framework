@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path, reference_date='2024-12-31'):
     """Calculate RFM scores (recency, frequency, monetary) for each account."""
-    transactions = pd.read_csv(transactions_path)
+    transactions = pd.read_csv(transactions_path, comment='#')
     
     # Convert dates
     transactions['txn_date'] = pd.to_datetime(transactions['txn_date'])

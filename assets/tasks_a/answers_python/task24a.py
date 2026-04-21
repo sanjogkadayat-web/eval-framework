@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Implement SCD Type 2 history tracking for account_status changes across account snapshots."""
-    df = pd.read_csv(accounts_path)
+    df = pd.read_csv(accounts_path, comment='#')
     
     # Convert account_open_date to datetime
     df['account_open_date'] = pd.to_datetime(df['account_open_date'])

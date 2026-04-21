@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Extract day_of_week, month, quarter, and is_weekend features from txn_date."""
-    df = pd.read_csv(transactions_path)
+    df = pd.read_csv(transactions_path, comment='#')
     
     # Convert txn_date to datetime
     df['txn_date'] = pd.to_datetime(df['txn_date'])

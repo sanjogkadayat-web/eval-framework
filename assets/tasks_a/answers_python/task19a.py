@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Deduplicate accounts by keeping the best row per account_id using a precedence rule over account_status."""
-    df = pd.read_csv(accounts_path)
+    df = pd.read_csv(accounts_path, comment='#')
     
     # Define status precedence: ACTIVE > SUSPENDED > CLOSED
     status_rank = {'ACTIVE': 1, 'SUSPENDED': 2, 'CLOSED': 3}

@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Clean string columns by stripping whitespace and normalizing to uppercase."""
-    df = pd.read_csv(accounts_path)
+    df = pd.read_csv(accounts_path, comment='#')
     
     # Strip whitespace from all string columns
     string_columns = df.select_dtypes(include=['object']).columns

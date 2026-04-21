@@ -9,8 +9,8 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Flag rows where txn_date is earlier than account_open_date after joining accounts and transactions."""
-    accounts = pd.read_csv(accounts_path)
-    transactions = pd.read_csv(transactions_path)
+    accounts = pd.read_csv(accounts_path, comment='#')
+    transactions = pd.read_csv(transactions_path, comment='#')
     
     # Convert dates to datetime
     accounts['account_open_date'] = pd.to_datetime(accounts['account_open_date'])

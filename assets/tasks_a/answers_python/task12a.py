@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Create a running total of txn_amount within each account ordered by txn_date."""
-    df = pd.read_csv(transactions_path)
+    df = pd.read_csv(transactions_path, comment='#')
     
     # Convert txn_date to datetime
     df['txn_date'] = pd.to_datetime(df['txn_date'])

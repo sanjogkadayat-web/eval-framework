@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Add a previous_txn_amount feature within each account using shift."""
-    df = pd.read_csv(transactions_path)
+    df = pd.read_csv(transactions_path, comment='#')
     
     # Convert txn_date to datetime
     df['txn_date'] = pd.to_datetime(df['txn_date'])

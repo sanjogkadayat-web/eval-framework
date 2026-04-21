@@ -10,7 +10,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Flag txn_amount outliers using the IQR rule."""
-    df = pd.read_csv(transactions_path)
+    df = pd.read_csv(transactions_path, comment='#')
     
     # Calculate IQR
     q1 = df['txn_amount'].quantile(0.25)

@@ -13,8 +13,8 @@ def run(accounts_path, transactions_path, balances_path, output_dir=None):
     log = []
     
     # Step 1: Ingest raw files
-    accounts = pd.read_csv(accounts_path)
-    transactions = pd.read_csv(transactions_path)
+    accounts = pd.read_csv(accounts_path, comment='#')
+    transactions = pd.read_csv(transactions_path, comment='#')
     log.append(f"Loaded accounts: {len(accounts)} rows, transactions: {len(transactions)} rows")
     
     # Step 2: Validate schema

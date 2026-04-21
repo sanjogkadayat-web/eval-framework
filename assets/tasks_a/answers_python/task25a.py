@@ -10,7 +10,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path, window=10, z_threshold=2.5):
     """Flag rolling z-score anomalies in txn_amount within each account using a moving window."""
-    df = pd.read_csv(transactions_path)
+    df = pd.read_csv(transactions_path, comment='#')
     
     # Convert txn_date to datetime
     df['txn_date'] = pd.to_datetime(df['txn_date'])

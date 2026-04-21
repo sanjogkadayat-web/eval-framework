@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Fill null txn_amount values with the median txn_amount of the file."""
-    df = pd.read_csv(transactions_path)
+    df = pd.read_csv(transactions_path, comment='#')
     
     median_amount = df['txn_amount'].median()
     df['txn_amount'] = df['txn_amount'].fillna(median_amount)

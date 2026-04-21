@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Assign each account to a cohort based on account_open_date month."""
-    df = pd.read_csv(accounts_path)
+    df = pd.read_csv(accounts_path, comment='#')
     
     # Convert account_open_date to datetime
     df['account_open_date'] = pd.to_datetime(df['account_open_date'])

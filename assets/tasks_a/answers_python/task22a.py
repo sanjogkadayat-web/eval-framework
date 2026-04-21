@@ -12,7 +12,7 @@ def run(accounts_path, transactions_path, balances_path):
     audit_log = []
     
     # Step 1: Load accounts
-    accounts = pd.read_csv(accounts_path)
+    accounts = pd.read_csv(accounts_path, comment='#')
     audit_log.append({
         'step': 'load_accounts',
         'action': 'load',
@@ -30,7 +30,7 @@ def run(accounts_path, transactions_path, balances_path):
     })
     
     # Step 3: Load transactions
-    transactions = pd.read_csv(transactions_path)
+    transactions = pd.read_csv(transactions_path, comment='#')
     audit_log.append({
         'step': 'load_transactions',
         'action': 'load',

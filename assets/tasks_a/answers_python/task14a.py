@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run(accounts_path, transactions_path, balances_path):
     """Compute a rolling 7-day sum of txn_amount for each account using a time-based window."""
-    df = pd.read_csv(transactions_path)
+    df = pd.read_csv(transactions_path, comment='#')
     
     # Convert txn_date to datetime
     df['txn_date'] = pd.to_datetime(df['txn_date'])
