@@ -1,0 +1,36 @@
+# SYNTHETIC DATA — no real financial data
+# Pytest: test_task3a.py | Tests: task3a.py (PY-003)
+# Variants tested: clean, null_heavy, duplicate_heavy, medium, large
+
+import importlib
+import pathlib
+import sys
+import pytest
+import pandas as pd
+
+sys.path.insert(0, str(pathlib.Path(__file__).parent))
+task = importlib.import_module("task3a")
+
+DATASET_DIR = pathlib.Path(__file__).parent.parent / "assets" / "datasets"
+
+@pytest.mark.parametrize("variant", ["clean", "null_heavy", "duplicate_heavy", "medium", "large"])
+def test_task3a(variant):
+    """Test that task3a counts nulls per column."""
+    accounts_path = DATASET_DIR / f"synthetic_{variant}_accounts.csv"
+    transactions_path = DATASET_DIR / f"synthetic_{variant}_transactions.csv"
+    balances_path = DATASET_DIR / f"synthetic_{variant}_daily_balances.csv"
+    
+    if variant == "null_heavy":
+        # Expect error to be raised for null_heavy variant
+        with pytest.raises(ValueError):
+            task.run(accounts_path, transactions_path, balances_path, threshold=0.15)
+    else:
+        result = task.run(accounts_path, transactions_path, balances_path, threshold=0.30)
+        
+        # Verify result is a DataFrame
+        assert isinstance(result, pd.DataFrame)
+        
+        # Verify expected columns
+        assert 'column' in result.columns
+        assert 'null_count' in result.columns
+        assert 'null_percentage' in result.columns
