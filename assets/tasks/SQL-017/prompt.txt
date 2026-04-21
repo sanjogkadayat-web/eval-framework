@@ -1,1 +1,0 @@
-CTE + ROW_NUMBER to return top 3 highest-value transactions per account.

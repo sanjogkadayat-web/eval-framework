@@ -1,1 +1,0 @@
-Flag rows where txn_date is earlier than account_open_date.

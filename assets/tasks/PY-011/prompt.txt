@@ -1,1 +1,0 @@
-ETL pipeline: load accounts, validate schema, filter ACTIVE rows, save output.

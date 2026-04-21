@@ -1,1 +1,0 @@
-Show average txn_amount by channel, rounded to 2 decimals.

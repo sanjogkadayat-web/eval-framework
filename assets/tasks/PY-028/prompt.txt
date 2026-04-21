@@ -1,1 +1,0 @@
-Flag churned accounts with no transactions in last N days.

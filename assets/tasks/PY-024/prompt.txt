@@ -1,1 +1,0 @@
-SCD Type 2 history tracking for account_status changes across two snapshots.

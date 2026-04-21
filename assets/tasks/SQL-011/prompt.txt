@@ -1,1 +1,0 @@
-Join all 3 tables, compute total txn_amount and avg closing_balance by region.

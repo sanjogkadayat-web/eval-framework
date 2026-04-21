@@ -1,1 +1,0 @@
-7-day moving average of closing_balance per account.

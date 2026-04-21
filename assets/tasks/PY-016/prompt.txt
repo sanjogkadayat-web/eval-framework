@@ -1,1 +1,0 @@
-Extract day_of_week, month, quarter, is_weekend from txn_date.

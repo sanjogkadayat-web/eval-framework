@@ -1,1 +1,0 @@
-Rolling 7-day sum of txn_amount per account using time-based window.

@@ -1,1 +1,0 @@
-Compute total txn_amount by txn_type.

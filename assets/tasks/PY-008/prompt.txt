@@ -1,1 +1,0 @@
-Pivot table of total txn_amount with region as rows and channel as columns.

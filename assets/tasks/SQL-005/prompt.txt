@@ -1,1 +1,0 @@
-Inner join accounts + transactions, show txn_id with account_status.

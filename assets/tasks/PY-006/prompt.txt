@@ -1,1 +1,0 @@
-Strip whitespace and uppercase region and customer_segment columns.

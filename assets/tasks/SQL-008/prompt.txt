@@ -1,1 +1,0 @@
-Extract year and month from txn_date, count transactions per year-month.

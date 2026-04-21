@@ -1,1 +1,0 @@
-Running total of txn_amount per account ordered by txn_date.

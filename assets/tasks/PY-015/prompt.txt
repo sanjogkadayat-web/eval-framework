@@ -1,1 +1,0 @@
-Add previous_txn_amount column using shift within each account.
