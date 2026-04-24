@@ -334,11 +334,14 @@ def run(task_id_filter=None):
         f.write("|:------|:-----|-------------:|-------------:|--------------:|\n")
         for r in records:
             pd = r["performance_detail"]
-            clean = metrics.get((f"task{int(re.search(r'\\d+', r['task_id']).group())}{r['model']}.sql", "clean"), {})
-            f.write(f"| {r['model_name']} | {r['task_id']} "
-                    f"| {pd['runtime_ms']['mean']} "
-                    f"| {round(safe_float(clean.get('token_usage_input', 0)))} "
-                    f"| {round(safe_float(clean.get('token_usage_output', 0)))} |\n")
+            task_match = re.search(r'\d+', r['task_id'])
+            if task_match:
+                task_num = int(task_match.group())
+                clean = metrics.get((f"task{task_num}{r['model']}.sql", "clean"), {})
+                f.write(f"| {r['model_name']} | {r['task_id']} "
+                        f"| {pd['runtime_ms']['mean']} "
+                        f"| {round(safe_float(clean.get('token_usage_input', 0)))} "
+                        f"| {round(safe_float(clean.get('token_usage_output', 0)))} |\n")
 
     print(f"✓ MD    → {md_out}")
     print(f"\n{'='*50}")

@@ -1,0 +1,165 @@
+{
+  "aggregates": {
+    "a": {
+      "model_name": "Claude Sonnet 4.5",
+      "task_count": 1,
+      "mean_scores": {
+        "correctness": 25.0,
+        "formatting": 25.0,
+        "performance": 10.0,
+        "reliability": 25.0,
+        "total": 85.0
+      }
+    },
+    "b": {
+      "model_name": "ChatGPT 5.2 Codex",
+      "task_count": 1,
+      "mean_scores": {
+        "correctness": 25.0,
+        "formatting": 11.11,
+        "performance": 12.5,
+        "reliability": 18.75,
+        "total": 67.36
+      }
+    },
+    "c": {
+      "model_name": "Gemini 2.5 Flash",
+      "task_count": 1,
+      "mean_scores": {
+        "correctness": 25.0,
+        "formatting": 20.59,
+        "performance": 10.0,
+        "reliability": 25.0,
+        "total": 80.59
+      }
+    }
+  },
+  "records": [
+    {
+      "task_id": "SQL-019",
+      "prompt": "Compute a 7-day moving average of closing_balance per account.",
+      "category": "Medium",
+      "model": "a",
+      "model_name": "Claude Sonnet 4.5",
+      "is_baseline": false,
+      "scores": {
+        "correctness": 25.0,
+        "formatting": 25.0,
+        "performance": 10.0,
+        "reliability": 25.0,
+        "total": 85.0
+      },
+      "delta_vs_baseline": {
+        "correctness": 0.0,
+        "formatting": 13.89,
+        "performance": -2.5,
+        "reliability": 6.25,
+        "total": 17.64
+      },
+      "correctness_detail": {
+        "clean_gate_passed": true,
+        "consensus_row_count": "9000"
+      },
+      "reliability_detail": {
+        "per_variant": {
+          "null_heavy": true,
+          "duplicate_heavy": true,
+          "medium": true,
+          "large": true
+        }
+      },
+      "performance_detail": {
+        "runtime_ms": {
+          "mean": 18,
+          "band_score": 5.0
+        },
+        "tokens": {
+          "total": 154,
+          "band_score": 15.0
+        }
+      }
+    },
+    {
+      "task_id": "SQL-019",
+      "prompt": "Compute a 7-day moving average of closing_balance per account.",
+      "category": "Medium",
+      "model": "b",
+      "model_name": "ChatGPT 5.2 Codex",
+      "is_baseline": true,
+      "scores": {
+        "correctness": 25.0,
+        "formatting": 11.11,
+        "performance": 12.5,
+        "reliability": 18.75,
+        "total": 67.36
+      },
+      "delta_vs_baseline": null,
+      "correctness_detail": {
+        "clean_gate_passed": true,
+        "consensus_row_count": "9000"
+      },
+      "reliability_detail": {
+        "per_variant": {
+          "null_heavy": false,
+          "duplicate_heavy": true,
+          "medium": true,
+          "large": true
+        }
+      },
+      "performance_detail": {
+        "runtime_ms": {
+          "mean": 8,
+          "band_score": 7.5
+        },
+        "tokens": {
+          "total": 140,
+          "band_score": 17.5
+        }
+      }
+    },
+    {
+      "task_id": "SQL-019",
+      "prompt": "Compute a 7-day moving average of closing_balance per account.",
+      "category": "Medium",
+      "model": "c",
+      "model_name": "Gemini 2.5 Flash",
+      "is_baseline": false,
+      "scores": {
+        "correctness": 25.0,
+        "formatting": 20.59,
+        "performance": 10.0,
+        "reliability": 25.0,
+        "total": 80.59
+      },
+      "delta_vs_baseline": {
+        "correctness": 0.0,
+        "formatting": 9.48,
+        "performance": -2.5,
+        "reliability": 6.25,
+        "total": 13.23
+      },
+      "correctness_detail": {
+        "clean_gate_passed": true,
+        "consensus_row_count": "9000"
+      },
+      "reliability_detail": {
+        "per_variant": {
+          "null_heavy": true,
+          "duplicate_heavy": true,
+          "medium": true,
+          "large": true
+        }
+      },
+      "performance_detail": {
+        "runtime_ms": {
+          "mean": 127,
+          "band_score": 2.5
+        },
+        "tokens": {
+          "total": 139,
+          "band_score": 17.5
+        }
+      }
+    }
+  ]
+}
