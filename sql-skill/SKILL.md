@@ -39,7 +39,7 @@ This reads `assets/task_bank.csv` and `assets/eval_results.csv` and writes:
 | Output | Description |
 |---|---|
 | `outputs/[timestamp]/sql_scorecard_[task_id or all].json` | Machine-readable — aggregates + one record per task × model |
-| `outputs/[timestamp]/sql_scorecard_[task_id or all].md` | Human-readable — summary table, delta table, Quantitative Assessment scores, Critic placeholders |
+| `outputs/[timestamp]/sql_scorecard_[task_id or all].md` | Human-readable — summary table, delta table, Quantitative Assessment scores, Critic placeholders, Raw Metrics |
 
 ## Step 2 — Complete the Critic Review
 

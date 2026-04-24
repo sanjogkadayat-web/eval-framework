@@ -309,6 +309,19 @@ def run(task_id_filter=None):
         f.write("---\n\n")
         f.write(METRIC_KEY)
 
+        # Raw Metrics Table
+        f.write("\n---\n\n## Raw Metrics\n\n")
+        f.write("| Model | Task | Runtime (ms) | Peak Memory (bytes) | Input Tokens | Output Tokens |\n")
+        f.write("|:------|:-----|-------------:|--------------------:|-------------:|--------------:|\n")
+        for r in records:
+            pd = r["performance_detail"]
+            clean = metrics.get((f"task{int(re.search(r'\\d+', r['task_id']).group())}{r['model']}.py", "clean"), {})
+            f.write(f"| {r['model_name']} | {r['task_id']} "
+                    f"| {pd['runtime_ms']['mean']} "
+                    f"| {pd['peak_memory_bytes']['mean']} "
+                    f"| {round(safe_float(clean.get('token_usage_input', 0)))} "
+                    f"| {round(safe_float(clean.get('token_usage_output', 0)))} |\n")
+
     print(f"✓ MD    → {md_out}")
     print(f"\n{'='*50}")
     print("  PYTHON SCORECARD")
