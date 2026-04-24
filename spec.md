@@ -2,124 +2,105 @@
 
 **Feature Branch**: `001-sql-python-ai-eval`
 **Created**: 2026-03-19
-**Updated**: 2026-04-18
-**Status**: Draft
-**Version**: 0.5
+**Updated**: 2026-04-24
+**Status**: V1 Complete
+**Version**: 1.0
 
-> **Amendment A3 — April 2026 (ratified 2026-04-18):** The six-file answer architecture introduced under A1 is replaced by a two-table design: `assets/task_bank.csv` (master index) and `assets/eval_results.csv` (unified pre-recorded metrics, up to 3,000 rows). Model and language are encoded in code filenames (`task{N}{model}.{ext}`) rather than stored as explicit columns. Three team members author the data independently and produce `results_a.csv`, `results_b.csv`, `results_c.csv` (1,000 rows each), which are merged into `eval_results.csv` before release via a validated merge step. FR-002, FR-004, FR-005, FR-006, FR-015, FR-017 updated accordingly. FR-019 (new) governs the merge workflow. See Constitution Amendment Log A3 for full rationale.
+> **Amendment A4 — April 2026 (ratified):** V1 scope revised to 60 tasks (30 SQL + 30 Python). No `--contracted-only` flag — all 60 tasks are the client deliverable. Model letters corrected: `a` = Claude Sonnet 4.5, `b` = ChatGPT 5.2 Codex (baseline), `c` = Gemini 2.5 Flash. Correctness gate revised to row count majority consensus (SQL) and `pytest_pass_pct = 100` (Python). Performance scoring revised to 10-band percentile. `formatting_pass_pct` replaces `formatting_violations`. `run_eval.py` is the sole entry point per skill. Raw Metrics section added to scorecard output.
 
-> **Amendment A1 — April 2026 (ratified 2026-04-09):** Task count raised from 20–40 to 200 total (100 SQL + 100 Python). Client contract remains at 40 tasks (20 SQL + 20 Python). `assets/task_bank.csv` introduced as master index. `--contracted-only` CLI flag added. A1's six-file answer architecture has been superseded by A3's two-table design — see A3 entry above.
+> **Amendment A3 — April 2026 (ratified):** Two-table design adopted: `assets/task_bank.csv` + `assets/eval_results.csv`. Filename-based identity convention established. Per-author authoring convention (`results_table_a/b/c.csv`) merged by `merge_results.py`.
 
-> **Amendment A2 — April 2026 (ratified 2026-04-13):** `generation_time_ms` removed from all schemas and output artifacts.
+> **Amendment A2 — April 2026 (ratified):** `generation_time_ms` removed from all schemas.
+
+> **Amendment A1 — April 2026 (ratified):** Task count and contracted scope rules introduced. Superseded in part by A4.
 
 ---
 
 ## Overview
 
-The SQL + Python AI Evaluation Framework is a single zipped deliverable containing two Claude Agent Skills — one for SQL evaluation and one for Python evaluation — that assess AI-generated code across a task bank of 200 analytics engineering tasks (100 SQL + 100 Python). Of these, 40 tasks (20 SQL + 20 Python) constitute the contracted client deliverable, identified by `contracted = true` in `assets/task_bank.csv`. The remaining 160 tasks are delivered as a value-add beyond the contract.
+The SQL + Python AI Evaluation Framework is a single zipped deliverable containing two Claude Agent Skills — one for SQL evaluation and one for Python evaluation — that assess AI-generated code across a task bank of 60 analytics engineering tasks (30 SQL + 30 Python). All 60 tasks constitute the client deliverable.
 
-Each skill applies a four-dimension rubric: correctness (pre-recorded automated test results), formatting (pre-recorded style linting scores), performance (pre-recorded runtime, memory, and token metrics), and a language-specific AI Critic persona review (generated at harness runtime as bulleted qualitative comments). All dataset variants are bundled as synthetic flat files. Every model receives exactly one standardized prompt per task — no revisions. The deliverable produces a single unified machine-readable JSON and a human-readable markdown scorecard. Two scorecard modes are supported: `--contracted-only` (40 tasks — client deliverable) and full (200 tasks — value-add).
+Each skill applies a four-dimension rubric: correctness (pre-recorded automated test results), formatting (pre-recorded style linting scores), performance (pre-recorded runtime, memory, and token metrics), and a language-specific AI Critic persona review (generated at harness runtime as bulleted qualitative comments). All dataset variants are bundled as synthetic flat files. Every model receives exactly one standardized prompt per task — no revisions. The deliverable produces a single unified machine-readable JSON and a human-readable markdown scorecard per run.
 
 All model code generation, code execution, test execution, performance measurement, and formatting validation occur during a manual dataset preparation phase outside the harness. The harness reads, compares, and aggregates this pre-recorded data — it never generates, executes, or measures model code at runtime. The only content produced at harness runtime is the AI Critic persona reviews.
 
-Pre-recorded evaluation data is organized as a two-table design under `assets/`: the master index `task_bank.csv` (200 rows, one per task) and the unified results table `eval_results.csv` (up to 3,000 rows, one per model × task × variant). Model identity and language are encoded in code filenames using the pattern `task{N}{model}.{ext}` — e.g., `task1a.py` = task 1, Claude (letter `a`), Python. All scripts resolve file references through `task_bank.csv`; paths must not be hardcoded.
+Pre-recorded evaluation data is organized as a two-table design: `assets/task_bank.csv` (master index, 60 rows) and `assets/eval_results.csv` (unified results, up to 900 rows — 60 tasks × 3 models × 5 variants). Model identity and language are encoded in code filenames using the pattern `task{N}{model}.{ext}` — e.g., `task1a.py` = task 1, Claude Sonnet 4.5 (letter `a`), Python.
 
-It is designed for Analytics Engineers, Data Engineers, and Evaluation Leads at a Banking Institution who need an objective, evidence-based basis for AI model selection. The three models under evaluation are Claude Sonnet 4.5 (filename letter `a`), Gemini 2.5 Flash (letter `b`, evaluated), and ChatGPT 5.2 Codex (letter `c`, baseline). All scoring and ranking logic is enforced by deterministic scripts — Claude's judgment is never the arbiter of evaluation results.
+The three models under evaluation are Claude Sonnet 4.5 (filename letter `a`, evaluated), ChatGPT 5.2 Codex (letter `b`, baseline), and Gemini 2.5 Flash (letter `c`, evaluated). All scoring and ranking logic is enforced by deterministic scripts — Claude's judgment is never the arbiter of evaluation results.
 
 ---
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing
 
 ### User Story 1 — SQL Quantitative Evaluation (Priority: P1)
 
-An Analytics Engineer selects a SQL Task ID and the harness reads identical pre-recorded results for all three models from `assets/eval_results.csv`, resolving the task's three code filenames via `assets/task_bank.csv`. Each model's SQL output was generated from an identical standardized prompt in exactly one attempt — no revisions. The harness scores each model's pre-recorded metrics across two numeric dimensions — correctness (checksum / row-count / snapshot comparison fields in `eval_results.csv`) and performance (runtime, token usage) — using the five variant rows per filename to assess reliability.
+An Analytics Engineer describes a SQL analytics task in plain English. Claude matches the description against `assets/task_bank.csv`, resolves the task ID, and runs `sql-skill/scripts/run_eval.py --task-id [SQL-XXX]`. The harness reads pre-recorded metrics for all three models from `assets/eval_results.csv` and scores each model across correctness, formatting, performance, and reliability.
 
-**Why this priority**: Core RFP value path. Establishes baseline correctness and productivity metrics. Every other story extends or aggregates from this foundation. A working Story 1 is a shippable MVP.
+**Acceptance Scenarios:**
 
-**Independent Test**: Select a SQL task, resolve its three model filenames via `assets/task_bank.csv`, read pre-recorded rows for all three filenames across all five variants from `eval_results.csv`, interpret correctness (row count, checksum, snapshot pass) against pre-stored reference result sets, read performance metrics (runtime, token usage), persist all artifacts and scored results. Verify `--contracted-only` evaluates only contracted tasks.
-
-**Acceptance Scenarios**:
-
-1. **Given** a SQL Task ID and pre-recorded metric rows in `eval_results.csv`, **When** the harness interprets each model's correctness fields (`row_count`, `checksum`, `snapshot_pass`) against the reference result set, **Then** the system scores correctness and reads performance (query runtime, token usage) — with pass or fail recorded and all artifacts logged.
-2. **Given** a 100% correctness pass on the clean variant, **When** the harness reads the remaining four variant rows (null-heavy, duplicate-heavy, medium, large), **Then** per-variant scores are recorded, variant mismatches are detected at runtime by `schema_checker.py` and flagged in `result.json`, and the full metric set is reported: correctness score, query runtime, runtime vs. baseline, one-shot accuracy, and token usage.
-3. **Given** the `--contracted-only` flag is set, **When** the harness runs, **Then** only tasks where `contracted = true` in `task_bank.csv` (SQL-001–SQL-020) are evaluated; value-add tasks are skipped without error.
+1. **Given** a natural language prompt matching a SQL task, **When** Claude resolves the task ID and runs the scoring script, **Then** a scorecard is produced covering all three models with correctness, formatting, performance, and reliability scores plus delta vs baseline.
+2. **Given** a model passes correctness on the clean variant (row count matches majority consensus), **When** the harness reads the four non-clean variant rows, **Then** reliability ticks (✓/✗) are produced for null_heavy, duplicate_heavy, medium, and large variants.
+3. **Given** a model fails correctness on the clean variant, **When** reliability is evaluated, **Then** reliability score is 0 and ticks show ✗ for all variants — correctness gate enforced.
 
 ---
 
 ### User Story 2 — SQL Qualitative Evaluation (Priority: P1)
 
-An Analytics Engineer completes a SQL evaluation run and automatically receives two qualitative outputs: a pre-recorded formatting score from sqlfluff (numeric violation count read from the `formatting_violations` field in `eval_results.csv`) and bulleted comments from a SQL-specific AI Critic persona. The Critic reviews anonymized model output at harness runtime and delivers structured commentary — with no model identifier in its output.
+An Analytics Engineer completes a SQL evaluation run and automatically receives a structured AI Critic review. The Critic reads the anonymized SQL code files and produces commentary across four sections — Strengths, Failures, Mitigation Strategies, Observations — with one bullet per model.
 
-**Why this priority**: Co-equal with Story 1 — formatting validation and the SQL Critic are triggered as part of the same eval invocation and cannot be deferred without breaking the four-dimension rubric architecture.
+**Acceptance Scenarios:**
 
-**Independent Test**: Complete a SQL eval run, verify the `formatting_violations` value is read from `eval_results.csv` and recorded per attempt, verify the SQL Critic persona is automatically invoked on the anonymized output, confirm the Critic output contains all four sections (strengths, failures, mitigation strategies, observations), confirm no model identifier appears anywhere in the Critic output, and confirm both results are persisted under the correct artifact key.
-
-**Acceptance Scenarios**:
-
-1. **Given** a completed SQL eval run, **When** the harness reads the pre-recorded `formatting_violations` value from `eval_results.csv`, **Then** the count is recorded per attempt per model and reported in the scorecard as the formatting score.
-2. **Given** a completed SQL eval run, **When** the SQL Critic persona is automatically invoked on the anonymized SQL code file, **Then** it returns structured commentary with all four sections (strengths, failures, mitigation strategies, observations) per reviewed attempt.
-3. **Given** the SQL code file the Critic receives is identified by its anonymized filename (e.g., `task1a.sql`) only, **When** the SQL Critic produces its review, **Then** no model identifier (Claude Sonnet 4.5, Gemini 2.5 Flash, or ChatGPT 5.2 Codex) appears anywhere in the Critic's output, and the review is stored as `.md` keyed by `task_id` / `model` / `category`.
+1. **Given** a completed SQL scorecard with `<!-- CRITIC:... -->` placeholders, **When** Claude reads the SQL Critic persona and the anonymized code files, **Then** every placeholder is filled with a 1–3 sentence bullet covering the relevant section.
+2. **Given** the code files are identified by anonymized filename only (`task{N}{letter}.sql`), **When** the Critic produces its review, **Then** no real model name (Claude Sonnet 4.5, ChatGPT 5.2 Codex, Gemini 2.5 Flash) appears in the Critic's reasoning — only in the final formatted output using the `MODEL_NAMES` lookup.
+3. **Given** the Critic review is complete, **Then** the scorecard contains all four sections for all three models with no numeric scores in the Critic output.
 
 ---
 
 ### User Story 3 — Python Quantitative Evaluation (Priority: P2)
 
-A Data Engineer selects a Python Task ID and the harness reads identical pre-recorded results for all three models from `assets/eval_results.csv`, resolving the task's three code filenames via `assets/task_bank.csv`. Each model's Python output was generated from an identical standardized prompt in exactly one attempt — no revisions. The harness reads each model's pre-recorded evaluation data across two numeric dimensions — correctness (the `pytest_pass` field in `eval_results.csv`) and performance (wall-clock `runtime_ms`, `peak_memory_bytes` via tracemalloc, `token_usage_input`/`token_usage_output`) — across all five dataset variants.
+A Data Engineer describes a Python analytics task in plain English. Claude matches the description against `assets/task_bank.csv`, resolves the task ID, and runs `python-skill/scripts/run_eval.py --task-id [PY-XXX]`. The harness reads pre-recorded metrics for all three models and scores correctness (`pytest_pass_pct = 100` on clean), formatting (flake8), performance (runtime, memory, tokens), and reliability across four stress variants.
 
-**Why this priority**: Completes quantitative evaluation coverage for Python workflows per the RFP. Independently testable without requiring Story 1 infrastructure.
+**Acceptance Scenarios:**
 
-**Independent Test**: Select a Python task, resolve its three model filenames via `assets/task_bank.csv`, read pre-recorded rows for all three filenames across all five variants from `eval_results.csv`, read pre-recorded correctness (`pytest_pass`), read pre-recorded performance metrics (wall-clock time, peak memory via tracemalloc, token usage), persist all artifacts and scored results. Verify `--contracted-only` evaluates only contracted tasks.
-
-**Acceptance Scenarios**:
-
-1. **Given** a Python Task ID and pre-recorded metric rows in `eval_results.csv`, **When** the harness reads the `pytest_pass` fields for each model's filename, **Then** the system reports correctness (pytest pass/fail) and reads performance (wall-clock `runtime_ms`, `peak_memory_bytes` via tracemalloc, token usage) — with pass or fail recorded and all artifacts stored.
-2. **Given** a 100% pytest pass on the clean variant in the pre-recorded data, **When** the harness reads the remaining four variant rows, **Then** per-variant scores are reported, peak memory and wall-clock runtime are read from pre-recorded data, variant mismatches are flagged at runtime by `schema_checker.py` in `result.json`, and results are reported against the baseline reference.
-3. **Given** the `--contracted-only` flag is set, **When** the harness runs, **Then** only tasks where `contracted = true` in `task_bank.csv` (PY-001–PY-020) are evaluated; value-add tasks are skipped without error.
+1. **Given** a natural language prompt matching a Python task, **When** Claude resolves the task ID and runs the scoring script, **Then** a scorecard is produced with correctness (pytest), formatting (flake8), performance (runtime + memory + tokens), and reliability scores for all three models.
+2. **Given** a model passes correctness on the clean variant (`pytest_pass_pct = 100`), **When** the four non-clean variants are evaluated, **Then** reliability ticks are produced per variant.
+3. **Given** a model fails correctness on the clean variant, **Then** reliability score is 0 — correctness gate enforced.
 
 ---
 
 ### User Story 4 — Python Qualitative Evaluation (Priority: P2)
 
-A Data Engineer completes a Python evaluation run and automatically receives two qualitative outputs: a pre-recorded formatting score from flake8 (numeric PEP8 violation count read from the `formatting_violations` field in `eval_results.csv`) and bulleted comments from a Python-specific AI Critic persona. The Critic reviews anonymized model output at harness runtime and delivers structured commentary — with no model identifier in its output.
+A Data Engineer completes a Python evaluation run and automatically receives a structured AI Critic review using the Python Critic persona. Commentary covers code quality, null handling, pandas idioms, test coverage, and maintainability across four sections.
 
-**Why this priority**: Co-equal with Story 3 — formatting validation and the Python Critic are triggered as part of the same eval invocation and cannot be deferred without breaking the four-dimension rubric architecture.
+**Acceptance Scenarios:**
 
-**Independent Test**: Complete a Python eval run, verify the `formatting_violations` value is read from `eval_results.csv` and recorded per attempt, verify the Python Critic persona is automatically invoked on the anonymized output, confirm the Critic output contains all four sections (strengths, failures, mitigation strategies, observations), confirm no model identifier appears anywhere in the Critic output, and confirm both results are persisted under the correct artifact key.
-
-**Acceptance Scenarios**:
-
-1. **Given** a completed Python eval run, **When** the harness reads the pre-recorded `formatting_violations` value from `eval_results.csv`, **Then** the count is recorded per attempt per model and reported in the scorecard as the formatting score.
-2. **Given** a completed Python eval run, **When** the Python Critic persona is automatically invoked on the anonymized Python code file, **Then** it returns structured commentary with all four sections (strengths, failures, mitigation strategies, observations) per reviewed attempt.
-3. **Given** the Python code file the Critic receives is identified by its anonymized filename (e.g., `task1a.py`) only, **When** the Python Critic produces its review, **Then** no model identifier (Claude Sonnet 4.5, Gemini 2.5 Flash, or ChatGPT 5.2 Codex) appears anywhere in the Critic's output, and the review is stored as `.md` keyed by `task_id` / `model` / `category`.
+1. **Given** a completed Python scorecard with `<!-- CRITIC:... -->` placeholders, **When** Claude reads the Python Critic persona and the anonymized `.py` code files, **Then** every placeholder is filled with a concise bullet per model per section.
+2. **Given** the code files are identified by anonymized filename only, **When** the Critic produces its review, **Then** no real model name appears in the Critic's code analysis — only in the final formatted output.
+3. **Given** the Critic review is complete, **Then** all four sections are populated for all three models with no numeric scores.
 
 ---
 
-### User Story 5 — Comparative Scorecard and Failure Analysis (Priority: P3)
+### User Story 5 — Comparative Scorecard (Priority: P3)
 
-An Evaluation Lead runs the harness across any configured subset of the task bank and generates a comparative scorecard for Claude Sonnet 4.5 vs. Gemini 2.5 Flash (with ChatGPT 5.2 Codex as baseline). Two scorecard modes are available: `--contracted-only` (40 tasks — client deliverable) and full (200 tasks — value-add). Both modes use identical aggregation logic.
+An Evaluation Lead runs the full evaluation across all 30 SQL or all 30 Python tasks and generates a comparative scorecard with summary tables, delta analysis, per-task breakdown, Critic review, and raw quantitative metrics.
 
-**Why this priority**: Converts raw run data into the decision-ready insights requested in the RFP. Independently demonstrable once Stories 1–4 produce output data.
+**Acceptance Scenarios:**
 
-**Independent Test**: Run the harness on a configured subset of SQL + Python tasks and dataset variants; aggregate all run metrics and Critic outputs into a single unified JSON and a human-readable scorecard `.md` — without any manual intervention. Verify `--contracted-only` produces a scorecard covering exactly 40 tasks. Verify full run produces a scorecard covering all 200 tasks.
-
-**Acceptance Scenarios**:
-
-1. **Given** completed runs for all three models across SQL and Python tasks, **When** metrics are aggregated, **Then** the scorecard includes per model: correctness score, formatting score, performance metrics (runtime, memory, tokens), pass rate across dataset variants, performance delta vs. baseline, and Critic review summaries.
-2. **Given** scoring weights and thresholds [TBD — must be agreed upon with the Banking Institution before final delivery], **When** applied to aggregated results, **Then** a single unified JSON is produced covering all models × tasks × variants across both SQL and Python, and a human-readable markdown scorecard is generated without manual intervention.
-3. **Given** the `--contracted-only` flag is set, **When** the scorecard command runs, **Then** the output covers exactly the 40 contracted tasks (SQL-001–SQL-020 + PY-001–PY-020) and is clearly labelled as the client deliverable.
+1. **Given** a full evaluation run across all tasks, **When** scores are aggregated, **Then** the scorecard includes: mean scores per model, delta table vs ChatGPT baseline, per-task Quantitative Assessment with reliability ticks, full Critic Review, Metric Key, and Raw Metrics table.
+2. **Given** the same inputs are provided across independent runs, **Then** all numeric scores are identical — fully deterministic.
+3. **Given** a single-task run, **Then** the scorecard covers that task only and is saved to a new timestamped folder without overwriting any prior run.
 
 ---
 
 ## Edge Cases
 
-- **Deterministic SQL comparison**: All SQL comparisons enforce `ORDER BY` on stable keys or use set-based equivalence with numeric epsilon to prevent false failures from non-deterministic sort order.
-- **Variant mismatch**: System detects and flags variant mismatches (column/type differences between a variant's result set and the clean baseline schema) at harness runtime via `schema_checker.py`; mismatched runs are recorded in `result.json`, reported separately in the scorecard, and excluded from correctness scoring. Variant-mismatch status is derived at runtime — it is not a field in `eval_results.csv`.
-- **Null-heavy join keys**: Task datasets include null-heavy join scenarios; solutions must handle these without silent data loss.
-- **Duplicate primary keys**: Duplicate-key datasets are included; solutions that fail or produce incorrect outputs are categorized as edge-case failures.
-- **Critic anonymization**: The Critic persona must not be able to infer model identity from code style, comments, or output structure. Only the anonymized filename (e.g., `task1a.py`) is exposed.
-- **Missing pre-recorded data**: If `eval_results.csv` is missing required fields, a row for any `(filename, dataset_variant)` pair resolvable from `task_bank.csv`, or if a `filename` in `eval_results.csv` has no corresponding `task_id` row in `task_bank.csv`, the harness must fail with a clear validation error referencing `references/file-schema.md` — it must not proceed with partial data.
-- **Merge-step failure**: If the per-author files `results_a.csv`, `results_b.csv`, `results_c.csv` fail the merge validation (header mismatch, unknown variant value, duplicate primary key across files, or row-count anomaly), the release halts. `eval_results.csv` must not be produced from a failed merge.
-- **Contracted-only on partial artifact set**: If `--contracted-only` is passed but some contracted task artifacts are missing from `outputs/`, the scorecard must report which task IDs are absent rather than silently producing an incomplete report.
+- **Correctness gate**: SQL reliability is only scored if the model's row count matches majority consensus on the clean variant. Python reliability is only scored if `pytest_pass_pct = 100` on the clean variant.
+- **SQL majority consensus**: If all three models return different row counts on the clean variant, no model passes correctness — all score 0 for correctness and reliability.
+- **Missing pre-recorded data**: If `eval_results.csv` is missing rows for a `(filename, dataset_variant)` pair, the affected model scores 0 for the dimensions dependent on that variant.
+- **Gemini Python correctness**: Gemini 2.5 Flash scores 0 on most Python correctness tasks — genuine model finding, not a framework bug. Reliability is scored 0 as a consequence of the correctness gate.
+- **ChatGPT null-heavy reliability**: ChatGPT 5.2 Codex returns more rows than consensus on the null_heavy variant for 18/30 SQL tasks — genuine finding, documented in DEBT.md.
+- **Critic non-determinism**: Numeric scores are fully deterministic. Critic Review text may vary slightly between runs due to LLM non-determinism — this is expected and documented.
+- **Per-author merge failure**: If `results_table_a/b/c.csv` fail the merge validation in `merge_results.py`, the release halts. `eval_results.csv` must not be produced from a failed merge.
 
 ---
 
@@ -127,67 +108,68 @@ An Evaluation Lead runs the harness across any configured subset of the task ban
 
 ### Functional Requirements
 
-
-| FR         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Owner  |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| **FR-001** | System MUST maintain a task bank of 200 analytics tasks (100 SQL + 100 Python) indexed in `assets/task_bank.csv`. The contracted client subset is 40 tasks (SQL-001–SQL-020 + PY-001–PY-020), identified by `contracted = true` in `task_bank.csv` — the single source of truth for contracted scope. All 200 tasks have associated dataset variants, standardized prompts (inline in `task_bank.csv`), acceptance tests, and baseline reference solutions.                                                                                                                                                       | Script |
-| **FR-002** | System MUST read pre-recorded model metrics for Claude Sonnet 4.5 (filename letter `a`), Gemini 2.5 Flash (letter `b`), and ChatGPT 5.2 Codex (letter `c`, baseline) from the unified `assets/eval_results.csv` table. Model identity is encoded in the `filename` field using the pattern `task{N}{model}.{ext}`; no real model names appear in `eval_results.csv`, in code filenames, or in any file inside the zip. `model_token` identifiers used in `outputs/` paths are derived from the filename letter at load time.                                                                                       | Script |
-| **FR-003** | System MUST enforce a one-shot evaluation policy — each model has exactly one pre-recorded code file per task; no revisions are permitted; all prompts, outputs, and results MUST be logged.                                                                                                                                                                                                                                                                                                                                                                                                                      | Script |
-| **FR-004** | System MUST score correctness by interpreting pre-recorded fields in `eval_results.csv`: SQL (`row_count` against reference row count, `checksum` against reference checksum, `snapshot_pass` boolean — all per variant); Python (`pytest_pass` boolean per variant). Deterministic comparison rules per `references/deterministic-rules.md` apply.                                                                                                                                                                                                                                                                 | Script |
-| **FR-005** | System MUST report formatting scores read from the `formatting_violations` field in `eval_results.csv`: Python via flake8/PEP8 (numeric violation count); SQL via sqlfluff (numeric violation count); scores reported per attempt per model alongside Critic output.                                                                                                                                                                                                                                                                                                                                              | Script |
-| **FR-006** | System MUST report performance metrics read from `eval_results.csv`: `runtime_ms` (both languages, per variant), `peak_memory_bytes` (Python only, per variant), `token_usage_input` + `token_usage_output` (both languages; same value across all five variant rows for a given filename).                                                                                                                                                                                                                                                                                                                        | Script |
-| **FR-007** | System MUST compare pre-recorded results across all five dataset variants (clean, null_heavy, duplicate_heavy, medium, large) for every model answer that achieves 100% correctness on the clean dataset; variant column/type mismatches MUST be detected at harness runtime by `schema_checker.py` and flagged in `result.json`.                                                                                                                                                                                                                                                                                  | Script |
-| **FR-008** | System MUST invoke a SQL Critic persona automatically at the end of every SQL eval run; the Critic MUST return structured commentary with four sections (strengths, failures, mitigation strategies, observations) with no numeric score and no model identifier in its output.                                                                                                                                                                                                                                                                                                                                   | LLM    |
-| **FR-009** | System MUST invoke a Python Critic persona automatically at the end of every Python eval run; the Critic MUST return structured commentary with four sections (strengths, failures, mitigation strategies, observations) with no numeric score and no model identifier in its output.                                                                                                                                                                                                                                                                                                                             | LLM    |
-| **FR-010** | System MUST report efficiency metrics read from `eval_results.csv`: one-shot accuracy (derived from `pytest_pass` on clean for Python, or from `snapshot_pass` + `row_count` + `checksum` match on clean for SQL), and token usage (input + output) per task per model.                                                                                                                                                                                                                                                                                                                                            | Script |
-| **FR-011** | System MUST persist all artifacts (code files, logs, scored results, metrics, Critic output) keyed by `task_id` / `model` / `category`; all machine-readable outputs stored as `.json`; all datasets and pre-recorded evaluation data as `.csv`; all human-readable content as `.md`.                                                                                                                                                                                                                                                                                                                             | Script |
-| **FR-012** | System MUST emit a single unified machine-readable JSON covering all models × tasks × variants across both SQL and Python — with `contracted` flag on each record (resolved from `task_bank.csv`) — and an aggregated comparative scorecard as `.md` with numeric scores and Critic review summaries; both `--contracted-only` (40 tasks) and full (200 tasks) modes MUST be supported.                                                                                                                                                                                                                            | Script |
-| **FR-013** | System MUST provide minimal CLI entry points: `eval-task` (SQL/Python), `scorecard`; supported flags: `--engine`, `--dataset-variant`, `--model`, `--outdir`, `--contracted-only`.                                                                                                                                                                                                                                                                                                                                                                                                                                 | Script |
-| **FR-014** | System MUST define numeric tolerances and variance bounds in `references/` before the first evaluation run: epsilon tolerance for float comparisons (per IEEE 754), fixed declared random seeds, `ORDER BY` on stable keys or set-based equivalence for SQL; runtime variance window [TBD].                                                                                                                                                                                                                                                                                                                       | Script |
-| **FR-015** | Deliverable MUST follow the two-skill folder structure within a single zip: `sql-skill/` and `python-skill/` each containing `SKILL.md` and `scripts/`; shared `assets/` at zip root containing `task_bank.csv`, `eval_results.csv`, task assets in `assets/tasks/` (including the three models' code files per task), synthetic datasets in `assets/datasets/`, and Critic persona templates under each skill's `assets/personas/`; shared `references/` at zip root (methodology `.md`, rubrics `.md`, file schema `.md`, deterministic rules `.md`); `requirements.txt` at zip root. Per-author `results_a.csv` / `results_b.csv` / `results_c.csv` files MUST NOT appear in the release. | Script |
-| **FR-016** | All bundled datasets MUST be synthetic only — explicitly labeled as synthetic in filename and file header; no real account numbers, routing numbers, transaction IDs, or customer identifiers; a README and quickstart guide MUST be included in the deliverable.                                                                                                                                                                                                                                                                                                                                                 | Script |
-| **FR-017** | System MUST validate `assets/eval_results.csv` against the unified schema in `references/file-schema.md` before scoring begins; validation MUST include: (1) header matches the canonical schema exactly, (2) `dataset_variant` column contains only the five canonical values, (3) no duplicate `(filename, dataset_variant)` primary keys, (4) every `task_id` derivable from a `filename` (via regex `task(\d+)([abc])\.(py\|sql)`) resolves to a row in `task_bank.csv`, (5) Python-only fields (`peak_memory_bytes`, `pytest_filename`, `pytest_pass`) are null for `.sql` filenames and populated for `.py` filenames; SQL-only fields (`checksum`, `row_count`, `snapshot_pass`) follow the inverse rule. Validation failures MUST halt the pipeline with a clear error message identifying the violation. | Script |
-| **FR-018** | System MUST resolve all task-to-file path mappings via `assets/task_bank.csv` before loading any pre-recorded metric data; scripts MUST NOT hardcode file paths or assume a per-task or per-model file layout.                                                                                                                                                                                                                                                                                                                                                                                                    | Script |
-| **FR-019** | System MUST provide a merge script that concatenates `results_a.csv`, `results_b.csv`, and `results_c.csv` into `assets/eval_results.csv` during the dataset preparation phase. The merge step MUST validate: (1) all three files share identical headers matching the canonical schema, (2) the `dataset_variant` column contains only the five canonical values in every file, (3) no `(filename, dataset_variant)` pair appears in more than one source file, (4) the merged output has exactly the expected row count (sum of source rows) and no duplicate primary keys. Merge failures MUST halt release. Per-author files MUST NOT appear in the released zip. | Script |
-
+| FR | Description | Owner |
+|:---|:------------|:------|
+| **FR-001** | System MUST maintain a task bank of 60 analytics tasks (30 SQL + 30 Python) indexed in `assets/task_bank.csv`. All 60 tasks are the client deliverable — no contracted subset flag in V1. | Script |
+| **FR-002** | System MUST read pre-recorded model metrics for Claude Sonnet 4.5 (`a`), ChatGPT 5.2 Codex (`b`, baseline), and Gemini 2.5 Flash (`c`) from `assets/eval_results.csv`. Model identity is encoded in the `filename` field using the pattern `task{N}{model}.{ext}`. | Script |
+| **FR-003** | System MUST enforce a one-shot evaluation policy — each model has exactly one pre-recorded code file per task; no revisions permitted. | Script |
+| **FR-004** | System MUST score SQL correctness by row count majority consensus across all 3 models on the clean variant. Python correctness by `pytest_pass_pct = 100` on clean variant. Both gates must pass before reliability is scored. | Script |
+| **FR-005** | System MUST report formatting scores derived from `formatting_pass_pct` in `eval_results.csv` — mean across all 5 variants, scaled 0–25. Pre-recorded via sqlfluff (SQL) or flake8 (Python). | Script |
+| **FR-006** | System MUST report performance scores using 10-band percentile scoring against fixed thresholds. SQL: 2 sub-scores averaged (runtime, tokens). Python: 3 sub-scores averaged (runtime, memory, tokens). No baseline dependency. | Script |
+| **FR-007** | System MUST score reliability across 4 non-clean variants (null_heavy, duplicate_heavy, medium, large) only for models that pass the clean correctness gate. Reliability ticks (✓/✗) reported per variant. | Script |
+| **FR-008** | System MUST invoke the SQL Critic persona automatically after every SQL eval run. Critic MUST return structured commentary with 4 sections (Strengths, Failures, Mitigation Strategies, Observations), one bullet per model, no numeric scores. | LLM |
+| **FR-009** | System MUST invoke the Python Critic persona automatically after every Python eval run. Same 4-section format as FR-008. | LLM |
+| **FR-010** | System MUST write scorecard output to a new timestamped folder under `outputs/[YYYY-MM-DD_HH-MM]/`. No overwriting of prior runs. Both `.md` and `.json` produced per run. | Script |
+| **FR-011** | Scorecard MUST contain 6 sections in order: Summary Table, Delta Table, Quantitative Assessment, Critic Review, Metric Key, Raw Metrics. | Script |
+| **FR-012** | System MUST resolve all task-to-file path mappings via `assets/task_bank.csv`. Scripts MUST NOT hardcode file paths. | Script |
+| **FR-013** | System MUST provide `run_eval.py` in each skill's `scripts/` folder, supporting `--task-id` for single-task runs and no flag for all-task runs. | Script |
+| **FR-014** | System MUST provide `merge_results.py` at repo root to merge `results_table_a/b/c.csv` into `assets/eval_results.csv`. Merge MUST validate header consistency, variant enum, primary key uniqueness, and row counts. | Script |
+| **FR-015** | All bundled datasets MUST be synthetic only — labeled as synthetic in filename and file header. No real account numbers, routing numbers, or customer identifiers. | Script |
+| **FR-016** | Per-author `results_table_*.csv` files MUST NOT appear in the release zip. Only the merged `eval_results.csv` is shipped. | Script |
 
 ---
 
 ### Key Entities
 
-- **Task** — A single analytics engineering problem with a unique ID, language designation (SQL or Python, derived from code file extension), a `contracted` boolean indicating whether it is within the client-contracted scope, dataset variants, standardized prompt (stored inline in `task_bank.csv`), acceptance tests, and a baseline reference solution. Indexed in `assets/task_bank.csv`.
-- **Attempt** — A single model's pre-recorded code file and metrics for a Task. Each model has exactly one attempt per task, generated during dataset preparation. Identified by the code filename (e.g., `task1a.py`) and the filename letter convention (`a`/`b`/`c`). Pre-recorded execution results and performance metrics are stored as five rows in `eval_results.csv` (one per variant). `model_token` (`model_a`/`model_b`/`model_c`) is the anonymized identifier used in `outputs/` paths; real model names are re-associated only after all scoring is complete.
-- **Task Bank Index** — `assets/task_bank.csv`. Master index of all 200 tasks. One row per task. Scripts resolve all file paths and prompt text through this index. SKILL.md references its path in one line — the task list is never embedded inline.
-- **Unified Evaluation Results** — `assets/eval_results.csv`. The single source of truth for all pre-recorded numeric metrics. Up to 3,000 rows (200 tasks × 3 models × 5 variants). Primary key: `(filename, dataset_variant)`. Replaces the previous `answers/` and `variant_results/` split architecture under Amendment A3.
-- **Per-Author Results File** — `results_a.csv`, `results_b.csv`, or `results_c.csv`. 1,000 rows each. An **authoring convention** for the three-person team to generate pre-recorded data independently on separate machines. Each file holds rows for exactly one model letter. Merged into `eval_results.csv` before release via a validated merge step (FR-019). Not bundled in the released zip.
+- **Task** — A single analytics engineering problem with a unique ID (SQL-001–SQL-030, PY-001–PY-030), standardized prompt (stored inline in `task_bank.csv`), category (easy/medium/hard), and three model code files. Indexed in `assets/task_bank.csv`.
+- **Model** — One of three AI coding assistants: Claude Sonnet 4.5 (`a`), ChatGPT 5.2 Codex (`b`, baseline), Gemini 2.5 Flash (`c`). Model identity encoded in code filename letter.
+- **Task Bank Index** — `assets/task_bank.csv`. Master index of all 60 tasks. Scripts resolve all file paths through this index.
+- **Unified Evaluation Results** — `assets/eval_results.csv`. Single source of truth for all pre-recorded numeric metrics. Up to 900 rows. Primary key: `(filename, dataset_variant)`.
+- **Per-Author Results File** — `results_table_a/b/c.csv`. Authoring convention only — one file per team member per model. Merged before release, not bundled in zip.
 - **Dataset Variant** — One of five fixed input configurations: `clean`, `null_heavy`, `duplicate_heavy`, `medium`, `large`.
-- **Rubric** — The four-dimension scoring framework applied per Attempt: (1) Correctness — numeric, from pre-recorded `pytest_pass` (Python) or `checksum` / `row_count` / `snapshot_pass` (SQL); (2) Formatting — numeric, from pre-recorded `formatting_violations`; (3) Performance — numeric, from pre-recorded `runtime_ms`, `peak_memory_bytes`, `token_usage_input`, `token_usage_output`; (4) Critic Review — structured qualitative commentary (strengths, failures, mitigation strategies, observations), no numeric score, generated at harness runtime.
-- **Critic Persona** — A language-specific AI reviewer (SQL Critic or Python Critic) that produces structured commentary on anonymized code. Invoked automatically after every eval run at harness runtime. Output is stored as `.md` and referenced in the scorecard. The only LLM-generated content produced during harness execution.
-- **Metrics Run** — A complete record for one model × task × variant combination. Contains: correctness score, formatting score, performance metrics, reliability status, `contracted` flag (resolved from `task_bank.csv`), and Critic review reference. All numeric values derived from pre-recorded data in `eval_results.csv`.
-- **Scorecard** — The aggregated output across all models, tasks, and variants. Two modes: `--contracted-only` (40 tasks — client deliverable) and full (200 tasks — value-add). A single unified machine-readable `.json` with one record per model × task × variant. Human-readable summary (`.md`) includes all numeric scores and Critic review summaries. Scoring thresholds must be agreed upon with the Banking Institution before final delivery [TBD].
-- **Environment** — Captured metadata per run: Python version, OS, random seeds, and configuration state. Required for reproducibility. No database — flat-file storage only.
-- **Pre-Recorded Evaluation Data** — The complete set of model code files, execution results, performance metrics, and formatting scores captured during the dataset preparation phase and bundled as `task_bank.csv`, `eval_results.csv`, and per-task code files. This data is the input to the harness — never generated by it.
+- **Scorecard** — Aggregated output per run. Single-task or all-tasks mode. Saved as `.md` and `.json` in a timestamped `outputs/` subfolder.
+- **Critic Persona** — Language-specific AI reviewer (SQL or Python). Invoked at harness runtime. Produces 4-section structured commentary on anonymized code. Only LLM-generated content in the harness.
+- **Raw Metrics** — Actual runtime (ms), token usage (input + output), and peak memory (bytes, Python only) per model per task. Displayed in the final scorecard section sourced from `eval_results.csv`.
 
 ---
 
 ## Success Criteria
 
+| SC | Outcome | Theme |
+|:---|:--------|:------|
+| **SC-001** | Single-task SQL prompt returns a complete scorecard for all 3 models within one Claude session | User Experience |
+| **SC-002** | Single-task Python prompt returns a complete scorecard for all 3 models within one Claude session | User Experience |
+| **SC-003** | All-tasks SQL run produces a scorecard covering all 30 SQL tasks | Coverage |
+| **SC-004** | All-tasks Python run produces a scorecard covering all 30 Python tasks | Coverage |
+| **SC-005** | Same prompt produces identical numeric scores across independent runs | Determinism |
+| **SC-006** | SQL correctness correctly applies row count majority consensus on clean variant | Scoring Integrity |
+| **SC-007** | Python correctness correctly applies `pytest_pass_pct = 100` gate on clean variant | Scoring Integrity |
+| **SC-008** | Reliability scores 0 for any model that fails the clean correctness gate | Scoring Integrity |
+| **SC-009** | Performance scores use 10-band percentile bands with no baseline dependency | Scoring Integrity |
+| **SC-010** | Every scorecard run automatically produces Critic Review with all 4 sections populated for all 3 models | Output Quality |
+| **SC-011** | No real model name appears in code filenames, `eval_results.csv`, or Critic review analysis | Anonymization |
+| **SC-012** | Each run creates a new timestamped `outputs/` folder — no prior run is overwritten | Output Integrity |
+| **SC-013** | Raw Metrics table in every scorecard shows actual runtime, tokens, and memory sourced from `eval_results.csv` | Output Quality |
+| **SC-014** | `merge_results.py` produces a valid `eval_results.csv` or halts with a clear error — never produces a partial merge | Data Integrity |
+| **SC-015** | A Banking Institution team member with no prior training can upload the zip, run the SQL-019 prompt, and receive a complete scorecard | Deliverability |
 
-| SC         | Outcome                                                                                                                                                                                                                                                  | Theme                  |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| **SC-001** | One-shot accuracy = percentage of tasks solved correctly on the first (and only) attempt, derived from pre-recorded `pytest_pass` (Python) or `snapshot_pass` + `checksum` + `row_count` match (SQL) on the clean variant, and reported per model        | Accuracy               |
-| **SC-002** | Formatting score (flake8 violation count for Python; sqlfluff violation count for SQL) is read from `formatting_violations` in `eval_results.csv` and reported per attempt per model                                                                     | Formatting             |
-| **SC-003** | Average Token Output count                                                                                                                                                                                                                               | Efficiency             |
-| **SC-004** | Average token usage per task (input + output) is read from pre-recorded data and reported per model                                                                                                                                                      | Efficiency             |
-| **SC-005** | All artifacts (code files, logs, scored results, metrics, Critic output) are persisted with correct `task_id` / `model` / `category` keys for 100% of runs                                                                                               | Processing Reliability |
-| **SC-006** | SQL correctness comparisons produce identical results for identical pre-recorded inputs 100% of the time (deterministic comparison enforced)                                                                                                             | Processing Reliability |
-| **SC-007** | Variant comparisons complete across all five dataset variants for every model answer that achieves 100% correctness on clean, with results reported per variant                                                                                          | Processing Reliability |
-| **SC-008** | Every SQL and Python eval run automatically produces a Critic review with all four sections (strengths, failures, mitigation strategies, observations); no model identifier appears in any Critic output                                                 | Output Quality         |
-| **SC-009** | A single unified JSON covering all models × tasks × variants across both SQL and Python is produced for any configured subset of the task bank without manual intervention                                                                               | Output Quality         |
-| **SC-010** | The CLI accepts all specified flags (`--engine`, `--dataset-variant`, `--model`, `--outdir`, `--contracted-only`) and produces consistent output for identical invocations                                                                               | User Experience        |
-| **SC-011** | A README and quickstart guide are included; a Banking Institution team member with no prior training can invoke the skill and receive a complete contracted-scope scorecard within a single Claude session                                               | User Experience        |
-| **SC-012** | `assets/eval_results.csv` passes schema validation against `references/file-schema.md` — including the five FR-017 validation checks (header exactness, variant enum, primary-key uniqueness, task-bank coverage, per-language null rules) — before any scoring begins | Data Integrity         |
-| **SC-013** | `--contracted-only` scorecard covers exactly SQL-001–SQL-020 and PY-001–PY-020 (as determined by `contracted = true` in `task_bank.csv`) and is clearly labelled as the client deliverable; full scorecard covers all 200 tasks; both are producible from the same pipeline invocation without separate code paths | Contracted Scope       |
-| **SC-014** | The merge step (FR-019) produces an `eval_results.csv` that passes FR-017 validation with no duplicate primary keys, no unknown variant values, and exactly the expected row count; merge failures halt release before any `eval_results.csv` is written | Data Integrity         |
+---
 
+*End of spec.md*
 
+**Document History:**
+
+| Version | Date | Author | Changes |
+|:--------|:-----|:-------|:--------|
+| 0.1–0.5 | March–April 2026 | Team JAS | Initial drafts through Amendment A3 |
+| 1.0 | April 2026 | Team JAS | V1 delivery scope — Amendment A4 applied |

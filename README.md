@@ -13,7 +13,7 @@ The framework is packaged as two Claude Agent Skills and activates automatically
 - **SQL Skill:** Evaluates model-generated SQL across filters, joins, CTEs, window functions, deduplication, and incremental load patterns. Scores correctness via row count consensus, formatting via sqlfluff, performance via runtime and token usage, and reliability across five dataset variants.
 - **Python Skill:** Evaluates model-generated Python pipelines across ingestion, validation, transformation, feature engineering, and aggregation tasks. Scores correctness via pytest, formatting via flake8, performance via runtime and memory, and reliability across five dataset variants.
 - **AI Critic Review:** A SQL Critic and Python Critic persona automatically review anonymized model code after every evaluation run, producing structured qualitative commentary across four sections: Strengths, Failures, Mitigation Strategies, and Observations.
-- **Comparative Scorecard:** A single unified output covering all three models with numeric scores, delta vs the ChatGPT baseline, per-task breakdown, and Critic review — saved as both markdown and JSON per run.
+- **Comparative Scorecard:** A single unified output covering all three models with numeric scores, delta vs the ChatGPT baseline, per-task breakdown, Critic review, and raw quantitative metrics — saved as both markdown and JSON per run.
 - **Fully Deterministic:** All numeric scoring is derived from pre-recorded metrics. The same prompt always produces the same scores.
 
 ## Prerequisites
@@ -24,23 +24,37 @@ The framework is packaged as two Claude Agent Skills and activates automatically
 
 ## Installation
 
+### Option 1 — Upload to Claude (Recommended)
+
+1. Go to **Settings > Capabilities** and ensure **Code Execution and File Creation** is turned on.
+2. Go to **Settings > Customize > Skills**.
+3. Click **"+"** then **"+ Create skill"**.
+4. Upload **eval_framework.zip**.
+   > The ZIP must contain the `eval_framework/` folder at root — not loose files.
+5. Toggle both the SQL Skill and Python Skill on.
+6. Open a new chat — the skills activate automatically.
+
+### Option 2 — Clone the Repository
+
+For contributors or teams running the framework locally in Cursor or Copilot:
+
 ```bash
 # Clone the repository
 git clone https://github.com/sanjogkadayat-web/eval-framework
-
+cd eval-framework
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-### Upload to Claude
+To update to the latest version:
 
-1. Go to **Settings > Customize > Skills** in Claude.ai
-2. Click **"+"** then **"+ Create skill"**
-3. Upload **eval_framework.zip**
-  > The ZIP must contain the `eval_framework/` folder at root — not loose files
-4. Toggle both the SQL Skill and Python Skill on
-5. Open a new chat — the skills activate automatically
+```bash
+git pull origin main
+pip install -r requirements.txt
+```
+
+Then re-package and re-upload the zip to Claude if needed.
 
 ## Usage
 
@@ -82,7 +96,7 @@ outputs/[YYYY-MM-DD_HH-MM]/
 └── python_scorecard_PY-011.json
 ```
 
-Every scorecard contains five sections: Summary Table, Delta vs Baseline, Quantitative Assessment, Critic Review, and Metric Key.
+Every scorecard contains six sections: Summary Table, Delta vs Baseline, Quantitative Assessment, Critic Review, Metric Key, and Raw Metrics.
 
 ## Project Structure
 
@@ -110,14 +124,12 @@ eval_framework/
 
 Four dimensions, 25 points each. Maximum score: 100.
 
-
-| Dimension   | Points | What It Measures                                                                                             |
-| ----------- | ------ | ------------------------------------------------------------------------------------------------------------ |
-| Correctness | 25     | SQL: row count majority consensus on clean variant. Python: all pytest tests pass on clean variant.          |
-| Formatting  | 25     | SQL: sqlfluff violations. Python: flake8 / PEP 8 violations.                                                 |
-| Performance | 25     | 10-band percentile scoring on runtime and tokens (SQL) or runtime, memory, and tokens (Python).              |
-| Reliability | 25     | Pass rate across null-heavy, duplicate-heavy, medium, and large variants. Only scored if correctness passes. |
-
+| Dimension | Points | What It Measures |
+|:----------|:------:|:-----------------|
+| Correctness | 25 | SQL: row count majority consensus on clean variant. Python: all pytest tests pass on clean variant. |
+| Formatting | 25 | SQL: sqlfluff violations. Python: flake8 / PEP 8 violations. |
+| Performance | 25 | 10-band percentile scoring on runtime and tokens (SQL) or runtime, memory, and tokens (Python). |
+| Reliability | 25 | Pass rate across null-heavy, duplicate-heavy, medium, and large variants. Only scored if correctness passes. |
 
 Delta (Δ) values compare Claude Sonnet 4.5 and Gemini 2.5 Flash against the ChatGPT 5.2 Codex baseline. Positive = better. Negative = worse.
 
