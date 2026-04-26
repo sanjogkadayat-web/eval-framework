@@ -1,0 +1,34 @@
+import importlib
+import pathlib
+import sys
+
+import pandas as pd
+import pytest
+
+# SYNTHETIC DATA — no real financial data
+# Pytest: test_task9b.py | Tests: task9b.py (PY-009)
+# Variants tested: clean, null_heavy, duplicate_heavy, medium, large
+
+TASK_DIR = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(TASK_DIR))
+task = importlib.import_module("task9b")
+
+DATASET_DIR = pathlib.Path(__file__).resolve().parents[2] / "datasets"
+
+
+@pytest.mark.parametrize("variant", ["clean", "null_heavy", "duplicate_heavy", "medium", "large"])
+def test_task9b_run(variant: str) -> None:
+    accounts_path = DATASET_DIR / f"synthetic_{variant}_accounts.csv"
+    transactions_path = DATASET_DIR / f"synthetic_{variant}_transactions.csv"
+    balances_path = DATASET_DIR / f"synthetic_{variant}_daily_balances.csv"
+
+    before = pd.read_csv(transactions_path, skiprows=1)
+    before_amt = pd.to_numeric(before["txn_amount"], errors="coerce")
+    has_any_non_null = before_amt.notna().any()
+
+    out = task.run(accounts_path, transactions_path, balances_path)
+    assert isinstance(out, pd.DataFrame)
+
+    out_amt = pd.to_numeric(out["txn_amount"], errors="coerce")
+    if has_any_non_null:
+        assert out_amt.notna().all()

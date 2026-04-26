@@ -1,0 +1,1 @@
+Create a running total of txn_amount within each account ordered by txn_date.

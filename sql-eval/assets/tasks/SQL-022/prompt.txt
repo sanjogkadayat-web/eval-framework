@@ -1,0 +1,1 @@
+Build a three-CTE scorecard with account count, flagged txn count, and average balance by region.

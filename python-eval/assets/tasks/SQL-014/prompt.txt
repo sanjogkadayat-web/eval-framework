@@ -1,0 +1,1 @@
+Use a CTE to isolate only ACTIVE accounts, then join that CTE to transactions.

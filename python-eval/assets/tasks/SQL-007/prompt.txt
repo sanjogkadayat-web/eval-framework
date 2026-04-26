@@ -1,0 +1,1 @@
+Bucket txn_amount into 'small', 'medium', and 'large' using CASE WHEN.

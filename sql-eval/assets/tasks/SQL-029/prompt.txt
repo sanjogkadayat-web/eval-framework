@@ -1,0 +1,1 @@
+Perform cohort analysis by grouping accounts by account_open_date month and measuring later-month transaction activity.

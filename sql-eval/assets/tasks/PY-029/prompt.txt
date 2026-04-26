@@ -1,0 +1,1 @@
+Run a config-driven pipeline where thresholds and input paths come from YAML.

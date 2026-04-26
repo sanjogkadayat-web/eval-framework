@@ -1,0 +1,1 @@
+Use EXISTS to return accounts that have at least one flagged transaction.

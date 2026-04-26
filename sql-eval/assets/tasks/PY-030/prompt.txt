@@ -1,0 +1,1 @@
+Write parameterized pytest cases covering null-heavy, duplicate-heavy, and clean variants for one transformation function.

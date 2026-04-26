@@ -1,0 +1,1 @@
+Count nulls per column in the null-heavy variant and raise an error if any column exceeds a configured threshold.

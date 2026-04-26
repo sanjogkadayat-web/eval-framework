@@ -1,0 +1,1 @@
+Calculate RFM scores (recency, frequency, monetary) for each account.

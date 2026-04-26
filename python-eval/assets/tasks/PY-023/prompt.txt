@@ -1,0 +1,1 @@
+Build an end-to-end pipeline that ingests raw files, validates schema, deduplicates, engineers features, and writes outputs with logging.

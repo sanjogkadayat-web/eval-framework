@@ -1,0 +1,1 @@
+Load one of the accounts CSV files, skip the synthetic header row, and assert the expected five column names.

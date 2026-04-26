@@ -1,0 +1,1 @@
+Return the first and last closing_balance observed for each account using window functions.

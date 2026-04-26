@@ -1,0 +1,1 @@
+Compute funnel drop-off from account creation to first transaction to first flagged transaction.

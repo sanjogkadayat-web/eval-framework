@@ -1,0 +1,1 @@
+Generate an audit log DataFrame capturing each transformation step and row counts before/after.

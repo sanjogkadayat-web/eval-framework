@@ -1,0 +1,1 @@
+Clean string columns by stripping whitespace and normalizing region and customer_segment to uppercase.

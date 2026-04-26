@@ -1,0 +1,1 @@
+Write a functional ETL pipeline that loads accounts, validates schema, filters active rows, and saves output.

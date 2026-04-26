@@ -1,0 +1,1 @@
+Group transactions by txn_type and compute total txn_amount and row count.
